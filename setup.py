@@ -9,7 +9,7 @@ setup(
             "unbuffered": True,
             "optimize": 2,
             "dll_excludes": ["mswsock.dll", "powrprof.dll", "w9xpopen.exe"],
-            "excludes": ["Tkconstants", "Tkinter", "tcl", "socket", "ssl", "bz2", "ctypes", "unicodedata", "pyexpat"],
+            "excludes": ["Tkconstants", "Tkinter", "tcl", "ssl", "bz2", "ctypes", "unicodedata", "pyexpat"],
         }
     }
 )
