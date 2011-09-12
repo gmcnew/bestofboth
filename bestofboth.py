@@ -514,11 +514,12 @@ def decay_trees(level, decayList):
     
     # First, find all logs that are attached to this tree.
     logs = set()
-    maxSize = 0
+    maxSize = logQueue.qsize()
+    i = 0
     while not logQueue.empty():
-        maxSize = max(logQueue.qsize(), maxSize)
+        i += 1
         (distance, x, z, y) = logQueue.get()
-        sys.stdout.write("\r  log queue size: %d (max: %d)%s" % (logQueue.qsize(), maxSize, " " * 20))
+        sys.stdout.write("\rexamining tree %d of %d on the erosion boundary..." % (i, maxSize))
         treeLogQueue = Queue.PriorityQueue()
         treeLogQueue.put((x, z, y, False, x, z, y))
         treeLogs = set()
@@ -573,7 +574,7 @@ def decay_trees(level, decayList):
     while not decayQueue.empty():
         maxSize = max(decayQueue.qsize(), maxSize)
         (distance, x, z, y) = decayQueue.get()
-        sys.stdout.write("\r  decay queue size: %d (max: %d)%s" % (decayQueue.qsize(), maxSize, " " * 20))
+        sys.stdout.write("\rdecaying trees (decay queue size: %d; max: %d)...%s" % (decayQueue.qsize(), maxSize, " " * 10))
         
         if distance > DECAY_DISTANCE_LIMIT:
             continue
@@ -645,7 +646,6 @@ def smooth(worldDir, edgeFilename, width = 16):
                 newEdgeFile.write("%s\n" % (task))
         print("")
         
-        print("decaying %d pieces of eroded trees..." % (len(treeDecayList)))
         decay_trees(level, treeDecayList)
         
         print("saving changes...")
