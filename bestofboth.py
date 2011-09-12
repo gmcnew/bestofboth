@@ -234,8 +234,8 @@ class ErosionTask:
                         chunkChanged = True
                         erodeDest -= 2
                 
-                # During erosion, skip air, leaves, and logs.
-                elif block not in [airID, leafID, logID]:
+                # During erosion, skip air, leaves, logs and vines.
+                elif block not in [airID, leafID, logID, vinesID]:
                     chunk.Blocks[x, z, erodeDest] = block
                     chunkChanged = True
                     erodeDest -= 1
@@ -244,6 +244,8 @@ class ErosionTask:
             # Turn everything in this vertical column into air, but leave
             # trees alone (to avoid weird-looking half-trees). Trees will be
             # decayed elsewhere.
+            # TODO: Allow vines to persist if they're attached to a tree that
+            # persists.
             for ah in range(airHeight, 128):
                 if chunk.Blocks[x, z, ah] not in [leafID, logID]:
                     chunk.Blocks[x, z, ah] = airID
@@ -508,9 +510,8 @@ def decay_trees(level, decayList):
         #print("%s %d,%d,%d" % (chunk, x, y, z))
         logQueue.put((0, x, z, y))
     
-    # Leaves can be up to 5 blocks from a trunk, and vines (which we also care
-    # about) can be 1 block further.
-    DECAY_DISTANCE_LIMIT = 6
+    # Leaves can be up to 6 blocks from a trunk.
+    LEAF_DISTANCE_LIMIT = 6
     
     # First, find all logs that are attached to this tree.
     logs = set()
@@ -576,12 +577,17 @@ def decay_trees(level, decayList):
         (distance, x, z, y) = decayQueue.get()
         sys.stdout.write("\rdecaying trees (decay queue size: %d; max: %d)...%s" % (decayQueue.qsize(), maxSize, " " * 10))
         
-        if distance > DECAY_DISTANCE_LIMIT:
-            continue
-        
         (relX, relZ, relY) = (x % 16, z % 16, y)
         chunk = level.getChunk(x / 16, z / 16)
         blockID = chunk.Blocks[relX, relZ, relY]
+        
+        # Vines may be attached to leaves, so we have to allow extra search
+        # distance for vines.
+        distanceLimit = LEAF_DISTANCE_LIMIT
+        if blockID == vinesID:
+            distanceLimit += 1
+        if distance > distanceLimit:
+            continue
         
         neighborPositions = []
         
