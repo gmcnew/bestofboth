@@ -12,6 +12,12 @@ Introduction
 Some people dodge this problem by creating a new world whenever Minecraft's terrain code changes. But who wants to lose all of their old creations? With this tool, you can turn those ugly terrain discontinuities into a gentle river and get the **best of both** worlds! *(cue theme music)*
 
 
+Screenshots
+-----------
+
+http://gmcnew.imgur.com/bestofboth
+
+
 How to use this tool
 --------------------
 
