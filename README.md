@@ -83,8 +83,7 @@ Summary of typical use
 Known issues
 ------------
 
-* Snow layers in the tops of eroded trees do not always fall to the ground below.
-* Eroding trees can remove large numbers of leaves from trees that remain in the world. (This will be fixed when I do leaf decay the right way instead of the lazy way.)
+See the [list of issues](https://github.com/gmcnew/bestofboth/issues).
 
 These issues only apply to the --smooth step. You should still be able to run --find-edges, explore your world, and wait to run --smooth until you've upgraded to a version of this tool that fixes these issues.
 
