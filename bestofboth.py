@@ -10,9 +10,9 @@ import sys
 import textwrap
 import zlib
 
-import materials
-import mclevel
-from mclevelbase import ChunkNotPresent
+from pymclevel import materials
+from pymclevel import mclevel
+from pymclevel.mclevelbase import ChunkNotPresent
 
 VERSION_STRING = "0.1"
 
@@ -390,26 +390,26 @@ class Erode:
     VE  = 4 # vertical edge
     HE  = 5 # horizontal edge
 
-airID       = materials.materials.Air.ID
-dirtID      = materials.materials.Dirt.ID
-grassID     = materials.materials.Grass.ID
-iceID       = materials.materials.Ice.ID
-leafID      = materials.materials.Leaves.ID
-logID       = materials.materials.Wood.ID
-sandID      = materials.materials.Sand.ID
-saplingID   = materials.materials.Sapling.ID
-snowLayerID = materials.materials.SnowLayer.ID
-vinesID     = 106
-waterID     = materials.materials.WaterStill.ID
+airID       = materials.alphaMaterials.Air.ID
+dirtID      = materials.alphaMaterials.Dirt.ID
+grassID     = materials.alphaMaterials.Grass.ID
+iceID       = materials.alphaMaterials.Ice.ID
+leafID      = materials.alphaMaterials.Leaves.ID
+logID       = materials.alphaMaterials.Wood.ID
+sandID      = materials.alphaMaterials.Sand.ID
+saplingID   = materials.alphaMaterials.Sapling.ID
+snowLayerID = materials.alphaMaterials.SnowLayer.ID
+vinesID     = materials.alphaMaterials.Vines.ID
+waterID     = materials.alphaMaterials.WaterStill.ID
 
 # Map log IDs to the corresponding sapling types. This is used when replanting
 # trees on eroded slopes. Since normal trees are the only ones that can grow in
 # a 1x1 column, we'll only use normal saplings. (Other saplings might not be
 # able to grow.)
 saplingData = {
-    materials.materials.Wood.blockData:         materials.materials.Sapling.blockData,
-    materials.materials.Ironwood.blockData:     materials.materials.Sapling.blockData,
-    materials.materials.BirchWood.blockData:    materials.materials.Sapling.blockData,
+    materials.alphaMaterials.Wood.blockData:         materials.alphaMaterials.Sapling.blockData,
+    materials.alphaMaterials.Ironwood.blockData:     materials.alphaMaterials.Sapling.blockData,
+    materials.alphaMaterials.BirchWood.blockData:    materials.alphaMaterials.Sapling.blockData,
 }
 
 leafAndAirIDs = [
@@ -461,7 +461,7 @@ def remove_tree_block(chunk, relX, relZ, relY, distance = 1):
     turnToAir = []
     
     if blockID == leafID:
-        chunk.Blocks[relX, relZ, relY] = airID #materials.materials.WhiteWool.ID
+        chunk.Blocks[relX, relZ, relY] = airID #materials.alphaMaterials.WhiteWool.ID
         chunk.Data  [relX, relZ, relY] = 0 #distance
     
         # If this leaf had a snow layer above it, make the snow fall to the
@@ -492,7 +492,7 @@ def remove_tree_block(chunk, relX, relZ, relY, distance = 1):
     # Some logs might be found at nonzero distances. This means they were't part
     # of the tree being eroded, so we shouldn't remove them.
     elif blockID == logID and distance == 0:
-        chunk.Blocks[relX, relZ, relY] = airID #materials.materials.LavaStill.ID
+        chunk.Blocks[relX, relZ, relY] = airID #materials.alphaMaterials.LavaStill.ID
         chunk.Data  [relX, relZ, relY] = 0
         chunk.chunkChanged()
 
@@ -535,7 +535,7 @@ def decay_trees(level, decayList):
                 blockID = chunk.Blocks[relX, relZ, relY]
                 if blockID == logID:
                     isLog = True
-                    #chunk.Blocks[relX, relZ, relY] = airID #materials.materials.LavaStill.ID
+                    #chunk.Blocks[relX, relZ, relY] = airID #materials.alphaMaterials.LavaStill.ID
                     #chunk.Data  [relX, relZ, relY] = 0
                     #chunk.chunkChanged()
                 elif lookForGround and blockID in [dirtID, grassID]:
