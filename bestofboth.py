@@ -163,6 +163,9 @@ class ErosionTask:
             h = (deepestWaterDepth - WATER_HEIGHT) * distanceAcross
             h += WATER_HEIGHT
             
+            # Make the river bed slope upward slightly toward the edges.
+            h += 0.3 * abs(relativeDistance) / waterWidth
+            
         else:
             # We're on land. Make relativeDistance positive for simplicity.
             if relativeDistance < 0:
@@ -188,6 +191,8 @@ class ErosionTask:
             h = (currentTerrainHeight - WATER_HEIGHT) * relativeRiverDistance
             if (h < 0):
                 h = 0
+            if (h < 1):
+                h += 0.5
             h += WATER_HEIGHT
         
         h = int(h)
@@ -335,6 +340,10 @@ class EdgeErosionTask(ErosionTask):
         except ChunkNotPresent:
             return False
         
+        # Let straight sections of the river bend slightly. (When wiggleRoom is
+        # 0 the river will be perfectly straight.)
+        wiggleRoom = random.random() - 0.5
+        
         for cx in range(-1, 1):
             for cz in range(-1, 1):
                 chunkChanged = False
@@ -362,9 +371,11 @@ class EdgeErosionTask(ErosionTask):
                         if self.edgeDirection == Erode.HE:
                             # horizontal edge
                             distanceFromCenter = abs(7.5 - z)
+                            distanceFromCenter += wiggleRoom * (abs(x - 7.5)) * (1 if z > 7.5 else -1)
                         elif self.edgeDirection == Erode.VE:
                             # vertical edge
                             distanceFromCenter = abs(7.5 - x)
+                            distanceFromCenter += wiggleRoom * (abs(z - 7.5)) * (1 if x > 7.5 else -1)
                         else:
                             raise Exception("unrecognized edge direction %d (%s)" % (self.edgeDirection, Erode.Map[self.edgeDirection]))
                             
