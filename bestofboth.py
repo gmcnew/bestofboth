@@ -242,6 +242,7 @@ class ErosionTask:
                 # During erosion, skip air, leaves, logs and vines.
                 elif block not in [airID, leafID, logID, vinesID]:
                     chunk.Blocks[x, z, erodeDest] = block
+                    chunk.Data  [x, z, erodeDest] = data
                     chunkChanged = True
                     erodeDest -= 1
                 surfaceHeight -= 1
