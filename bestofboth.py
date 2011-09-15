@@ -682,6 +682,66 @@ def smooth(worldDir, edgeFilename, width = 16):
     elif smoothed == numTasks:
         print("the map is perfectly smoothed -- nothing to do!")
 
+def fix_sea_level(worldDir, edgeFilename):
+    level = mclevel.fromFile(worldDir)
+    
+    waterBlocks = 0
+    blocks = 0
+    
+    allChunks = [x for x in level.allChunks]
+    numChunks = len(allChunks)
+    i = 0
+    for chunkPosition in allChunks:
+        i += 1
+        sys.stdout.write("\rdetecting current sea level (chunk %d of %d)..." % (i, numChunks))
+        chunk = level.getChunk(chunkPosition[0], chunkPosition[1])
+        # Shift everything down by one block, deleting whatever is at layer 1.
+        # (Layer 0 should remain solid bedrock.)
+        for x in range(0, 16):
+            for z in range(0, 16):
+                if chunk.Blocks[x, z, WATER_HEIGHT] in [waterID, iceID]:
+                    waterBlocks += 1
+                blocks += 1
+    print("")
+    waterCoverage = float(waterBlocks) / blocks
+    print("water coverage at y=%d: %.2f%%" % (WATER_HEIGHT, (waterCoverage * 100)))
+    
+    if waterCoverage < 0.1:
+        print("... but that seems too low!")
+        sys.exit(1)
+    
+    i = 0
+    for chunkPosition in allChunks:
+        i += 1
+        chunk = level.getChunk(chunkPosition[0], chunkPosition[1])
+        # Shift everything down by one block, deleting whatever is at layer 1.
+        # (Layer 0 should remain solid bedrock.)
+        sys.stdout.write("\rreducing sea level (chunk %d of %d)..." % (i, numChunks))
+        newBlocks = []
+        newData   = []
+        for x in range(0, 16):
+            for z in range(0, 16):
+                newBlocks[:] = chunk.Blocks[x, z, 2 : 127]
+                newData  [:] = chunk.Data  [x, z, 2 : 127]
+                chunk.Blocks[x, z, 1 : 126] = newBlocks
+                chunk.Data  [x, z, 1 : 126] = newData
+                """
+                for y in range (1, 127):
+                    chunk.Blocks[x, z, y] = chunk.Blocks[x, z, y + 1]
+                    chunk.Data  [x, z, y] = chunk.Data  [x, z, y + 1]
+                """
+                chunk.Blocks[x, z, 127] = airID
+                chunk.Data  [x, z, 127] = 0
+        chunk.chunkChanged()
+    
+    level.saveInPlace()
+    
+    # TODO: Make sure edges.txt hasn't been modified. (How? There could have
+    # been multiple "islands" of land in the original world, so the presence
+    # of one completely-enclosed group of chunks doesn't tell us anything.
+    
+    # TODO: Autodetect the current sea level instead of assuming it's 64 (1.7).
+
 def addCorner(chunkPos, erodeList, erodeType):
     (chunkX, chunkZ) = chunkPos
     erodeList.append(
@@ -856,6 +916,10 @@ def main():
                     dest="smooth",
                     metavar = "path",
                     help="path to the world to smooth")
+    parser.add_option("--fix-sea-level",
+                    dest="fix_sea_level",
+                    metavar = "path",
+                    help="path to the world to be given a 1.8+ sea level")
     """
     parser.add_option("--width", dest="width", 
                     default = "16",
@@ -866,17 +930,16 @@ def main():
 
     (options, args) = parser.parse_args()
     
-    worldDir = options.find_edges or options.smooth
+    worldDir = options.find_edges or options.smooth or options.fix_sea_level
     if worldDir:
         edgeFilePath = os.path.join(worldDir, "edges.txt")
     
     errorText = None
-    
     if options.find_edges and options.smooth:
         errorText = "--find-edges and --smooth can't be specified " \
             "at the same time. Please run with --find-edges first, " \
             "then run with --smooth."
-    elif not (options.find_edges or options.smooth):
+    elif not (options.find_edges or options.smooth or options.fix_sea_level):
         parser.print_help()
     elif not os.path.exists(os.path.join(worldDir, "level.dat")):
         errorText = "'%s' is not a Minecraft world directory (no " \
@@ -906,7 +969,10 @@ def main():
     elif options.smooth:
         # TODO: Fix the "--width" argument.
         #smooth(options.smooth, edgeFilePath, options.width)
+        startTime = time.time()
         smooth(worldDir, edgeFilePath)
+    elif options.fix_sea_level:
+        fix_sea_level(worldDir, edgeFilePath)
 
 if __name__ == "__main__":
     main()
