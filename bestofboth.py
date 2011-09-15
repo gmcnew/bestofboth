@@ -16,7 +16,8 @@ from pymclevel.mclevelbase import ChunkNotPresent
 
 VERSION_STRING = "0.1"
 
-WATER_HEIGHT = 63
+# Sea level is 62 in 1.8 and 63 in 1.7 and previous.
+WATER_HEIGHT = 62
 MAX_HEIGHT   = 128
 
 # The six orthogonal directions: up, down, left, right, front, and back.
