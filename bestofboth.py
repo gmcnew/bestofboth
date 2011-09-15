@@ -466,6 +466,35 @@ def find_edges(worldDir, edgeFilename):
     edgeFile.close()
     print("found %d edge(s)" % (numEdgeChunks))
 
+def ice_wall(worldDir):
+    level = mclevel.fromFile(worldDir)
+    print("making an ice wall around the world...")
+    
+    chunks = []
+    
+    for chunk in level.allChunks:
+        chunks.append(chunk)
+    
+    erodeTasks = []
+    
+    aroundMe = [(-1, -1), (0, -1), (1, -1),
+                (-1,  0),          (1,  0),
+                (-1,  1), (0,  1), (1,  1)]
+    i = 0
+    for chunkPos in chunks:
+        i += 1
+        sys.stdout.write("\r   chunk %d of %d" % (i, len(chunks)))
+        (cx, cz) = chunkPos
+        for (dx, dz) in aroundMe:
+            if (cx + dx, cz + dz) not in chunks:
+                # It's an edge chunk! Make a GIANT ICE WALL.
+                chunk = level.getChunk(cx, cz)
+                chunk.Blocks[:, :, 1:] = iceID
+                chunk.chunkChanged()
+                break
+    print("")
+    level.saveInPlace()
+
 # Remove this leaf or log block (and collapse the snow above it). Also works for
 # vines: if this is a vine block, it and any vines directly beneath it will be
 # removed.
@@ -908,6 +937,10 @@ def main():
     random.seed(0)
     
     parser = optparse.OptionParser(usage = get_usage_text())
+    parser.add_option("--ice-wall",
+                    dest="ice_wall",
+                    metavar = "path",
+                    help="path to the world to make an ice wall around")
     parser.add_option("--find-edges",
                     dest="find_edges",
                     metavar = "path",
@@ -930,7 +963,7 @@ def main():
 
     (options, args) = parser.parse_args()
     
-    worldDir = options.find_edges or options.smooth or options.fix_sea_level
+    worldDir = options.find_edges or options.smooth or options.fix_sea_level or options.ice_wall
     if worldDir:
         edgeFilePath = os.path.join(worldDir, "edges.txt")
     
@@ -939,7 +972,7 @@ def main():
         errorText = "--find-edges and --smooth can't be specified " \
             "at the same time. Please run with --find-edges first, " \
             "then run with --smooth."
-    elif not (options.find_edges or options.smooth or options.fix_sea_level):
+    elif not (options.find_edges or options.smooth or options.fix_sea_level or options.ice_wall):
         parser.print_help()
     elif not os.path.exists(os.path.join(worldDir, "level.dat")):
         errorText = "'%s' is not a Minecraft world directory (no " \
@@ -964,7 +997,9 @@ def main():
     """
     
     # Phew! Now that the arguments have been validated...
-    if options.find_edges:
+    if options.ice_wall:
+        ice_wall(worldDir)
+    elif options.find_edges:
         find_edges(worldDir, edgeFilePath)
     elif options.smooth:
         # TODO: Fix the "--width" argument.
