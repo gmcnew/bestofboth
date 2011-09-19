@@ -938,10 +938,6 @@ def main():
     random.seed(0)
     
     parser = optparse.OptionParser(usage = get_usage_text())
-    parser.add_option("--ice-wall",
-                    dest="ice_wall",
-                    metavar = "path",
-                    help="path to the world to make an ice wall around")
     parser.add_option("--find-edges",
                     dest="find_edges",
                     metavar = "path",
@@ -950,6 +946,10 @@ def main():
                     dest="smooth",
                     metavar = "path",
                     help="path to the world to smooth")
+    parser.add_option("--ice-wall",
+                    dest="ice_wall",
+                    metavar = "path",
+                    help="path to the world make an ice wall around")
     parser.add_option("--fix-sea-level",
                     dest="fix_sea_level",
                     metavar = "path",
