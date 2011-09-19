@@ -946,22 +946,28 @@ def main():
     parser.add_option("--find-edges",
                     dest="find_edges",
                     metavar = "path",
-                    help="path to the world to examine")
+                    help="path to the world to examine"
+                    )
     parser.add_option("--smooth",
                     dest="smooth",
                     metavar = "path",
-                    help="path to the world to smooth")
+                    help="path to the world to smooth"
+                    )
     parser.add_option("--ice-wall",
                     dest="ice_wall",
                     metavar = "path",
-                    help="EXPERIMENTAL: path to the world make an ice wall around")
+                    help=optparse.SUPPRESS_HELP #"EXPERIMENTAL: path to the world make an ice wall around"
+                    )
     parser.add_option("--fix-sea-level",
                     dest="fix_sea_level",
                     metavar = "path",
-                    help="EXPERIMENTAL: path to the world to be given a 1.8+ sea level")
+                    help=optparse.SUPPRESS_HELP #"EXPERIMENTAL: path to the world to be given a 1.8+ sea level"
+                    )
     parser.add_option("--force",
                     dest="force",
-                    action="store_true")
+                    action="store_true",
+                    help=optparse.SUPPRESS_HELP
+                    )
     """
     parser.add_option("--width", dest="width", 
                     default = "16",
