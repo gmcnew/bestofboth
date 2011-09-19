@@ -17,8 +17,9 @@ from pymclevel.mclevelbase import ChunkNotPresent
 VERSION_STRING = "0.1"
 
 # Sea level is 62 in 1.8 and 63 in 1.7 and previous.
-WATER_HEIGHT = 62
-MAX_HEIGHT   = 128
+WATER_HEIGHT     = 62
+WATER_HEIGHT_1_7 = 63
+MAX_HEIGHT       = 128
 
 # The six orthogonal directions: up, down, left, right, front, and back.
 ORTHOGONAL_NEIGHBOR_POSITIONS = [
@@ -712,7 +713,7 @@ def smooth(worldDir, edgeFilename, width = 16):
     elif smoothed == numTasks:
         print("the map is perfectly smoothed -- nothing to do!")
 
-def fix_sea_level(worldDir):
+def fix_sea_level(worldDir, force):
     level = mclevel.fromFile(worldDir)
     
     waterBlocks = 0
@@ -720,23 +721,35 @@ def fix_sea_level(worldDir):
     
     allChunks = [x for x in level.allChunks]
     numChunks = len(allChunks)
-    i = 0
-    for chunkPosition in allChunks:
-        i += 1
-        sys.stdout.write("\rdetecting current sea level (chunk %d of %d)..." % (i, numChunks))
-        chunk = level.getChunk(chunkPosition[0], chunkPosition[1])
-        for x in range(0, 16):
-            for z in range(0, 16):
-                if chunk.Blocks[x, z, WATER_HEIGHT] in [waterID, iceID]:
-                    waterBlocks += 1
-                blocks += 1
-    print("")
-    waterCoverage = float(waterBlocks) / blocks
-    print("water coverage at y=%d: %.2f%%" % (WATER_HEIGHT, (waterCoverage * 100)))
     
-    if waterCoverage < 0.1:
-        print("... but that seems too low!\nPerhaps the sea level has already been reduced.")
-        sys.exit(1)
+    # Unless we're supposed to forcibly lower the sea level, we should first
+    # check the current sea level and make sure it appears to be too high.
+    if not force:
+        i = 0
+        for chunkPosition in allChunks:
+            i += 1
+            sys.stdout.write("\rdetecting current sea level (chunk %d of %d)..." % (i, numChunks))
+            chunk = level.getChunk(chunkPosition[0], chunkPosition[1])
+            for x in range(0, 16):
+                for z in range(0, 16):
+                    if chunk.Blocks[x, z, WATER_HEIGHT_1_7] in [waterID, iceID]:
+                        waterBlocks += 1
+                    blocks += 1
+        print("")
+        waterCoverage = float(waterBlocks) / blocks
+        print("water coverage at y=%d: %.2f%%" % (WATER_HEIGHT_1_7, (waterCoverage * 100)))
+        
+        if waterCoverage < 0.1:
+            print("... but that seems too low!")
+            
+            print("")
+            print("\n".join(textwrap.wrap(
+                "The sea level has probably been reduced already. If you still " \
+                "want to reduce it, run this command again and add a '--force' " \
+                "argument. For example:")))
+            print("")
+            print("    bestofboth --fix-sea-level <path_to_world> --force")
+            sys.exit(1)
     
     i = 0
     for chunkPosition in allChunks:
@@ -946,6 +959,9 @@ def main():
                     dest="fix_sea_level",
                     metavar = "path",
                     help="EXPERIMENTAL: path to the world to be given a 1.8+ sea level")
+    parser.add_option("--force",
+                    dest="force",
+                    action="store_true")
     """
     parser.add_option("--width", dest="width", 
                     default = "16",
@@ -1006,7 +1022,7 @@ def main():
         startTime = time.time()
         smooth(worldDir, edgeFilePath)
     elif options.fix_sea_level:
-        fix_sea_level(worldDir)
+        fix_sea_level(worldDir, options.force)
     elif options.ice_wall:
         ice_wall(worldDir)
 
