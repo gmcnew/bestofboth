@@ -85,9 +85,22 @@ Known issues
 
 See the [list of issues](https://github.com/gmcnew/bestofboth/issues).
 
-Version 0.2 makes straight sections of the river bend slightly, and it fixes tall grass being turned into shrubs in eroded terrain.
 
 These issues only apply to the --smooth step. You should still be able to run --find-edges, explore your world, and wait to run --smooth until you've upgraded to a version of this tool that fixes these issues.
+
+
+Version history
+---------------
+
+### 0.1
+* Initial release.
+
+### 0.2
+* Straight sections of the river now bend slightly.
+* Tall grass is no longer turned into shrubs in eroded terrain.
+
+### 0.3
+* Carved rivers are now 1 block lower so they match the sea level of Minecraft 1.8+.
 
 Special thanks
 --------------
