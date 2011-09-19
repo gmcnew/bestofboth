@@ -712,7 +712,7 @@ def smooth(worldDir, edgeFilename, width = 16):
     elif smoothed == numTasks:
         print("the map is perfectly smoothed -- nothing to do!")
 
-def fix_sea_level(worldDir, edgeFilename):
+def fix_sea_level(worldDir):
     level = mclevel.fromFile(worldDir)
     
     waterBlocks = 0
@@ -725,8 +725,6 @@ def fix_sea_level(worldDir, edgeFilename):
         i += 1
         sys.stdout.write("\rdetecting current sea level (chunk %d of %d)..." % (i, numChunks))
         chunk = level.getChunk(chunkPosition[0], chunkPosition[1])
-        # Shift everything down by one block, deleting whatever is at layer 1.
-        # (Layer 0 should remain solid bedrock.)
         for x in range(0, 16):
             for z in range(0, 16):
                 if chunk.Blocks[x, z, WATER_HEIGHT] in [waterID, iceID]:
@@ -737,7 +735,7 @@ def fix_sea_level(worldDir, edgeFilename):
     print("water coverage at y=%d: %.2f%%" % (WATER_HEIGHT, (waterCoverage * 100)))
     
     if waterCoverage < 0.1:
-        print("... but that seems too low!")
+        print("... but that seems too low!\nPerhaps the sea level has already been reduced.")
         sys.exit(1)
     
     i = 0
@@ -765,12 +763,6 @@ def fix_sea_level(worldDir, edgeFilename):
         chunk.chunkChanged()
     
     level.saveInPlace()
-    
-    # TODO: Make sure edges.txt hasn't been modified. (How? There could have
-    # been multiple "islands" of land in the original world, so the presence
-    # of one completely-enclosed group of chunks doesn't tell us anything.
-    
-    # TODO: Autodetect the current sea level instead of assuming it's 64 (1.7).
 
 def addCorner(chunkPos, erodeList, erodeType):
     (chunkX, chunkZ) = chunkPos
@@ -949,11 +941,11 @@ def main():
     parser.add_option("--ice-wall",
                     dest="ice_wall",
                     metavar = "path",
-                    help="path to the world make an ice wall around")
+                    help="EXPERIMENTAL: path to the world make an ice wall around")
     parser.add_option("--fix-sea-level",
                     dest="fix_sea_level",
                     metavar = "path",
-                    help="path to the world to be given a 1.8+ sea level")
+                    help="EXPERIMENTAL: path to the world to be given a 1.8+ sea level")
     """
     parser.add_option("--width", dest="width", 
                     default = "16",
@@ -964,7 +956,13 @@ def main():
 
     (options, args) = parser.parse_args()
     
-    worldDir = options.find_edges or options.smooth or options.fix_sea_level or options.ice_wall
+    numPrimaryOptions = 0
+    worldDir = None
+    for option in [options.find_edges, options.smooth, options.fix_sea_level, options.ice_wall]:
+        if option:
+            worldDir = option
+            numPrimaryOptions += 1
+    
     if worldDir:
         edgeFilePath = os.path.join(worldDir, "edges.txt")
     
@@ -973,7 +971,9 @@ def main():
         errorText = "--find-edges and --smooth can't be specified " \
             "at the same time. Please run with --find-edges first, " \
             "then run with --smooth."
-    elif not (options.find_edges or options.smooth or options.fix_sea_level or options.ice_wall):
+    elif numPrimaryOptions > 1:
+        errorText = "Too many options specified."
+    elif not numPrimaryOptions:
         parser.print_help()
     elif not os.path.exists(os.path.join(worldDir, "level.dat")):
         errorText = "'%s' is not a Minecraft world directory (no " \
@@ -998,9 +998,7 @@ def main():
     """
     
     # Phew! Now that the arguments have been validated...
-    if options.ice_wall:
-        ice_wall(worldDir)
-    elif options.find_edges:
+    if options.find_edges:
         find_edges(worldDir, edgeFilePath)
     elif options.smooth:
         # TODO: Fix the "--width" argument.
@@ -1008,7 +1006,9 @@ def main():
         startTime = time.time()
         smooth(worldDir, edgeFilePath)
     elif options.fix_sea_level:
-        fix_sea_level(worldDir, edgeFilePath)
+        fix_sea_level(worldDir)
+    elif options.ice_wall:
+        ice_wall(worldDir)
 
 if __name__ == "__main__":
     main()
