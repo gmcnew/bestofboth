@@ -1025,7 +1025,6 @@ def main():
     elif options.smooth:
         # TODO: Fix the "--width" argument.
         #smooth(options.smooth, edgeFilePath, options.width)
-        startTime = time.time()
         smooth(worldDir, edgeFilePath)
     elif options.fix_sea_level:
         fix_sea_level(worldDir, options.force)
