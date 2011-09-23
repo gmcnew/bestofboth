@@ -14,7 +14,7 @@ from pymclevel import materials
 from pymclevel import mclevel
 from pymclevel.mclevelbase import ChunkNotPresent
 
-VERSION_STRING = "0.3"
+VERSION_STRING = "0.3.1"
 
 # Sea level is 62 in 1.8 and 63 in 1.7 and previous.
 WATER_HEIGHT     = 62
