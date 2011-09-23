@@ -101,7 +101,7 @@ Version history
 
 ### 0.3
 * Carved rivers are now 1 block lower so they match the sea level of Minecraft 1.8+.
-* _0.3.1_: Fix a bug in --smooth.
+* _0.3.1_: Fixed a bug in the --smooth step.
 * _0.3.2_: Made the --find-edges step a lot faster.
 
 Special thanks
