@@ -14,7 +14,7 @@ from pymclevel import materials
 from pymclevel import mclevel
 from pymclevel.mclevelbase import ChunkNotPresent
 
-VERSION_STRING = "0.3.1"
+VERSION_STRING = "0.3.2"
 
 # Sea level is 62 in 1.8 and 63 in 1.7 and previous.
 WATER_HEIGHT     = 62
@@ -814,7 +814,7 @@ def checkChunk(level, coords, toErode):
     
     for i in range(len(aroundMe)):
         a = aroundMe[i]
-        if (coords[0] + a[0], coords[1] + a[1]) not in level.allChunks:
+        if not level.containsChunk(coords[0] + a[0], coords[1] + a[1]):
             onPerimeter = True
             neighbors[i] = False
     
