@@ -72,7 +72,7 @@ class ErosionTask:
             if blockID == leafID:
                 for nPos in ORTHOGONAL_NEIGHBOR_POSITIONS:
                     (nx, nz, ny) = map(operator.add, (fx, fz, fy), nPos)
-                    if (nx, nz, ny) not in visited:
+                    if ny >= 0 and ny < 128 and ((nx, nz, ny) not in visited):
                         visited.add((nx, nz, ny))
                         frontier.append((nx, nz, ny))
             elif blockID == logID:
@@ -594,7 +594,8 @@ def decay_trees(level, decayList):
                         lookForGround = (nPos[2] == -1 and (nPos[0] == 0 or nPos[1] == 0))
                         
                         (nx, nz, ny) = map(operator.add, (x, z, y), nPos)
-                        treeLogQueue.put((nx, nz, ny, lookForGround, x, z, y))
+                        if ny >= 0 and ny < 128:
+                            treeLogQueue.put((nx, nz, ny, lookForGround, x, z, y))
         if not rootBlock:
             logs |= treeLogs
         else:
@@ -648,7 +649,8 @@ def decay_trees(level, decayList):
         
         for nPos in neighborPositions:
             (nx, nz, ny) = map(operator.add, (x, z, y), nPos)
-            decayQueue.put((distance + 1, nx, nz, ny))
+            if ny >= 0 and ny < 128:
+                decayQueue.put((distance + 1, nx, nz, ny))
     
     print("")
 
